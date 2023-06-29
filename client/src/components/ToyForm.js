@@ -4,39 +4,45 @@ function ToyForm({ onAddToy }) {
   const [formData, setFormData] = useState({
     name: "",
     image: "",
+    likes: 0,
   });
 
-  function handleChange(event) {
-    setFormData({
-      ...formData,
+  const handleChange = (event) => {
+    setFormData((prevFormData) => ({
+      ...prevFormData,
       [event.target.name]: event.target.value,
-    });
-  }
+    }));
+  };
 
-  function handleSubmit(event) {
+  const handleSubmit = (event) => {
     event.preventDefault();
 
     const newToy = {
-      ...formData,
-      likes: 0,
+      toy: { // Wrap the toy object with the 'toy' key
+        ...formData,
+      },
     };
 
-    fetch("/toys", {
+    fetch("http://localhost:3000/toys", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
       },
       body: JSON.stringify(newToy),
     })
-      .then((r) => r.json())
+      .then((response) => response.json())
       .then((newToy) => {
         setFormData({
           name: "",
           image: "",
+          likes: 0,
         });
         onAddToy(newToy);
+      })
+      .catch((error) => {
+        console.error("Error creating toy:", error);
       });
-  }
+  };
 
   return (
     <div className="container">
@@ -62,9 +68,9 @@ function ToyForm({ onAddToy }) {
         <br />
         <input
           type="submit"
-          name="submit"
           value="Create New Toy"
           className="submit"
+          disabled={!formData.name || !formData.image}
         />
       </form>
     </div>
